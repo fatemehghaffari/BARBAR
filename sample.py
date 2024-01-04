@@ -17,8 +17,18 @@ from ucb import run_simulation
 
 def main():
     '''Compares the epsilon-greedy approach to the upper confidence bounds
-    approach for solving the multi-armed bandit problem.'''
+    approach for solving the multi-armed bandit problem.
+    n: Number of arms
+    L: Number of agents
+    T: Number of rounds
+    means_real: Real means of arms
+    env_corr: corrupted environment
+    env: Uncorrupted environment
+    '''
+
     n = 10
+    L = 6
+    T = 5000
     # means_real = np.random.uniform(0, 1, 10)
     means_real = np.array([0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.8])
     env_corr = BanditNArmedBernoulliCorrupt1(n, deepcopy(means_real))
@@ -27,13 +37,13 @@ def main():
 
 
     # results_eps = run_simulation(epsilon_greedy_action)
-    results_ucb = run_simulation(env, means_real)
-    results_ucb_corr1 = run_simulation(env_corr, means_real)
-    results_barbar = BARBAR(env_corr, means_real, 10, 5000, delta = 0.2)
+    results_ucb = run_simulation(env, means_real, T)
+    results_ucb_corr1 = run_simulation(env_corr, means_real, T)
+    results_barbar = BARBAR(env_corr, means_real, n, T, delta = 0.2)
     # K = np.random.randint(0, 2, size=[1, 10])
 
     K = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-    results_barbar_het = BARBAR_dist_het(env, env_corr, means_real, 6, K, 5000, delta = 0.2)
+    results_barbar_het = BARBAR_dist_het(env, env_corr, means_real, 6, K, T, delta = 0.2)
 
     plt.plot(results_ucb_corr1, color='red')
     plt.plot(results_ucb, color='blue')
