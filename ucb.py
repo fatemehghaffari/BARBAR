@@ -12,7 +12,7 @@ def upper_confidence_bounds_action(t, means, count, epsilon=0.0):
     else:
         return np.argmax(means + np.sqrt(2 * np.log(t) / count))
     
-def run_simulation(env, means_real, num_trials=5000):
+def run_simulation(env, means_real, num_trials):
     '''Runs a 10-armed bandit simulation for multiple trials.
     
     Args:

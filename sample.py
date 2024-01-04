@@ -56,7 +56,7 @@ def main():
     ucb_patch = mpatches.Patch(color='blue', label='upper confidence bounds')
     barbar_patch = mpatches.Patch(color='green', label='BARBAR - Corruption v1')
     barbar_het_patch = mpatches.Patch(color='orange', label='BARBAR Het - 20 agents - Corruption v1')
-    plt.legend(handles=[ucb_corr1_patch, ucb_patch, barbar_patch])
+    plt.legend(handles=[ucb_corr1_patch, ucb_patch, barbar_patch, barbar_het_patch])
     plt.show()
 
 
