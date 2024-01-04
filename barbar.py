@@ -1,6 +1,6 @@
 import numpy as np 
 from copy import deepcopy
-
+from time import sleep
 
 def BARBAR(env, means_real, K, T, delta = 0.2):
     # lmbda = 1024 * np.log((8 * K / delta) * np.log2(T))
@@ -60,14 +60,14 @@ def BARBAR_dist_het_agent(env, K, N, pr):
     return ereward, actions
 
 
-def BARBAR_dist_het(env, env_corr, means_real, L, K, T, delta = 0.2):
+def BARBAR_dist_het(env, means_real, L, K, T, delta = 0.2):
     L_list = np.sum(K, axis = 0)
     r = np.zeros([L, len(L_list)])
     rs = np.zeros(L)
     Delta = deepcopy(K)
     m = 1
     t = 0
-    all_actions = [[]] * L
+    all_actions = [[] for _ in range(L)]
     k = K.shape[1]
     lmbda = np.log((8 * k / delta) * np.log2(T))
     n = np.zeros([L, k])
@@ -79,11 +79,7 @@ def BARBAR_dist_het(env, env_corr, means_real, L, K, T, delta = 0.2):
             N = np.sum(n[j]/L_list)
             N_max = max(N_max, N)
             pr = n[j] / (L_list * N)
-            if j == 0:
-                envv = env_corr
-            else:
-                envv = env
-            er, actions = BARBAR_dist_het_agent(envv, k, N, pr)
+            er, actions = BARBAR_dist_het_agent(env, k, N, pr)
             er = (er * L_list)/n[j]
             er[np.isnan(er)] = 0
             r[j] = er
@@ -92,14 +88,27 @@ def BARBAR_dist_het(env, env_corr, means_real, L, K, T, delta = 0.2):
         r_mean = np.mean(r, axis=0)
         rs = np.max(K * r_mean - (1/16) * Delta, axis=1)
         Delta = np.maximum(2**(-1*m), (np.reshape(rs, [len(rs), 1]) - r_mean)*K)
-        m += 1
+        m += 1    
+    # from collections import Counter
+    # for ind in range(L):
+    #     print(Counter(all_actions[ind]))
+    #     print(len(all_actions[ind]))
+    #     print()
     def regret(t):
         agg_reg = 0
         best = np.argmax(means_real * K, axis = 1)
         for ind in range(L):
-            # if means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)]) < 0:
-                # print("WHATTTTTTT", means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)]))
-            agg_reg += means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)])
+            if t > len(all_actions[ind]):
+                l = len(all_actions[ind])
+                agg_reg += means_real[best[ind]] * l - sum([means_real[all_actions[ind][i]] for i in range(l)])
+                # if means_real[best[ind]] * l - sum([means_real[all_actions[ind][i]] for i in range(l)])<0:
+                #     print(1)
+                #     sleep(1)
+            else:
+                agg_reg += means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)])
+                # if means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)])<0:
+                #     print(2)
+                #     sleep(1)
         return agg_reg
 
     return [regret(t) for t in range(T)]

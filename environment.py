@@ -49,7 +49,9 @@ class BanditEnv(gym.Env):
             else:
                 # corr = np.random.uniform(0, C)
                 reward = np.random.binomial(1, self.r_dist[action])
-
+        if self.corr_ver == 1:
+            if np.random.binomial(1, self.corr_rate_v1):
+                reward = int(not(reward))
         return 0, reward, done, {}
 
     def _reset(self):
@@ -67,10 +69,14 @@ class BanditNArmedBernoulli(BanditEnv):
     Mean of payout is pulled from a normal distribution (0, 1) (called q*(a))
     Actual reward is drawn from a normal distribution (q*(a), 1)
     """
-    def __init__(self, bandits, means):
+    def __init__(self, bandits, means, corr_ver = None, corr_rate_v1 = None, corr_total_v2 = None):
         p_dist = np.full(bandits, 1)
         r_dist = means
-
+        self.corr_ver = corr_ver
+        if self.corr_ver == 1:
+            self.corr_rate_v1 = corr_rate_v1
+        elif self.corr_ver == 2:
+            self.corr_rate_v2 = corr_total_v2
         BanditEnv.__init__(self, p_dist=p_dist, r_dist=r_dist)
 
 # class BanditNArmedBernoulliCorrupt1(BanditEnv):
@@ -111,7 +117,7 @@ class BanditNArmedBernoulliCorrupt1(BanditEnv):
     """
     def __init__(self, bandits, means):
         p_dist = np.full(bandits, 1)
-        corr_rate = 0.4
+        corr_rate = 1
 
         for i in range(bandits):
             if means[i] >= 0.5:
