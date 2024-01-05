@@ -101,14 +101,14 @@ def BARBAR_dist_het(env, means_real, L, K, T, delta = 0.2):
             if t > len(all_actions[ind]):
                 l = len(all_actions[ind])
                 agg_reg += means_real[best[ind]] * l - sum([means_real[all_actions[ind][i]] for i in range(l)])
-                # if means_real[best[ind]] * l - sum([means_real[all_actions[ind][i]] for i in range(l)])<0:
-                #     print(1)
-                #     sleep(1)
             else:
-                agg_reg += means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)])
+                agg_reg += float(format(means_real[best[ind]] * t, '.3f')) - float(format(sum([means_real[all_actions[ind][i]] for i in range(t)]), '.3f'))
                 # if means_real[best[ind]] * t - sum([means_real[all_actions[ind][i]] for i in range(t)])<0:
-                #     print(2)
-                #     sleep(1)
+                    # print(t)
+                    # print(means_real[best[ind]] * t)
+                    # print(sum([means_real[all_actions[ind][i]] for i in range(t)]))
+                    # print()
+                    # sleep(.1)
         return agg_reg
 
     return [regret(t) for t in range(T)]

@@ -28,10 +28,10 @@ def main():
 
     n = 10
     L = 5
-    T = 20000
+    T = 25000
     # means_real = np.random.uniform(0, 1, 10)
     means_real = np.array([0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.8])
-    env_corr = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate_v1 = 1)
+    env_corr = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate_v1 = 0.8)
     env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate_v1 = 0.2)
     # ev_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 2, corr_total_v2 = 5000)
     env = BanditNArmedBernoulli(n, deepcopy(means_real))
@@ -44,7 +44,7 @@ def main():
     results_barbar = BARBAR(env_corr, means_real, n, T, delta = 0.2)
     # K = np.random.randint(0, 2, size=[1, 10])
 
-    K = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    K = np.array([[1, 1, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
     results_barbar_het = BARBAR_dist_het(env_corr2, means_real, L, K, T, delta = 0.2)
 
     plt.plot(results_ucb_corr1, color='red')
