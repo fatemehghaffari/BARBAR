@@ -42,5 +42,38 @@ def run_simulation(env, means_real, num_trials):
 
     return [regret(t) for t in range(num_trials)]
 
+def run_simulation_multi_agent(env, L, means_real, num_trials, type = "Centralized"):
+    '''Runs a 10-armed bandit simulation for multiple trials.
+    
+    Args:
+    - get_action: a function which has input (t, means, count) and returns action
+    - num_trials: number of iterations
+
+    Returns:
+    - A list of regret versus time 
+    '''
+    n = len(means_real)
+    means = np.zeros([L, n])
+    count = np.zeros([L, n])
+    choices = [[] for _ in range(L)]
+
+    if type == "Centralized":
+        for t in range(num_trials):
+
+            action = upper_confidence_bounds_action(t, np.mean(means, axis = 0), count)
+            for ag in range(L):
+                observation, reward, done, info = env.step(action)
+                # Keep track of sample means for exploitation, and choices for regret calculation 
+                count[ag, action] += 1
+                means[ag, action] = (1 - 1/count[ag, action]) * means[ag, action] + (1/count[ag, action]) * reward
+                choices[ag].append(action)
+    def regret(t):
+        best = np.argmax(means_real)
+        reg = 0
+        for ag in range(L):
+            reg += means_real[best] * t - sum([means_real[choices[ag][i]] for i in range(t)])
+        return reg
+    return [regret(t) for t in range(num_trials)]
+
 
 
