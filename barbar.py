@@ -60,7 +60,7 @@ def BARBAR_dist_het_agent(env, K, N, pr):
     return ereward, actions
 
 
-def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1):
+def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1, Num_corr_agents = None, env_corr = None, ):
     L_list = np.sum(K, axis = 0)
     r = np.zeros([L, len(L_list)])
     rs = np.zeros(L)
@@ -80,6 +80,14 @@ def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2
             N = np.sum(n[j]/L_list)
             N_max = max(N_max, N)
             pr = n[j] / (L_list * N)
+            if Num_corr_agents != None:
+                if (j == 0):
+                    er, actions = BARBAR_dist_het_agent(env_corr, k, N, pr)
+                    er = (er * L_list)/n[j]
+                    er[np.isnan(er)] = 0
+                    r[j] = er
+                    all_actions[j] += actions
+                    continue
             er, actions = BARBAR_dist_het_agent(env, k, N, pr)
             er = (er * L_list)/n[j]
             er[np.isnan(er)] = 0
@@ -111,7 +119,7 @@ def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2
     elif regret_mode == "final":
         return regret(T)
 
-def BARBAR_lf_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1):
+def BARBAR_lf_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1, Num_corr_agents = None, env_corr = None):
     L_list = np.sum(K, axis = 0)
     k = K.shape[1]
     r = np.zeros(k)
@@ -134,6 +142,12 @@ def BARBAR_lf_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, 
             action = np.random.choice(np.array(range(k)), p=pr)
             pra = np.zeros(k)
             pra[action] = 1
+            if Num_corr_agents != None:
+                if (j == 0):
+                    er, actions = BARBAR_dist_het_agent(env_corr, k, N, pra)
+                    r += er
+                    all_actions[j] += actions
+                    continue
             er, actions = BARBAR_dist_het_agent(env, k, N, pra)
             r += er
             all_actions[j] += actions
