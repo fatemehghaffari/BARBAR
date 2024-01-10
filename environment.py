@@ -50,7 +50,10 @@ class BanditEnv(gym.Env):
                 # corr = np.random.uniform(0, C)
                 reward = np.random.binomial(1, self.r_dist[action])
         if self.corr_ver == 1:
-            if np.random.binomial(1, self.corr_rate_v1):
+            if np.random.binomial(1, self.corr_rate):
+                reward = int(not(reward))
+        if self.corr_ver == 2:
+            if np.random.binomial(1, self.corr_rate_list_v2[action]):
                 reward = int(not(reward))
         return 0, reward, done, {}
 
@@ -69,14 +72,15 @@ class BanditNArmedBernoulli(BanditEnv):
     Mean of payout is pulled from a normal distribution (0, 1) (called q*(a))
     Actual reward is drawn from a normal distribution (q*(a), 1)
     """
-    def __init__(self, bandits, means, corr_ver = None, corr_rate_v1 = None, corr_total_v2 = None):
+    def __init__(self, bandits, means, corr_ver = None, corr_rate = None):
         p_dist = np.full(bandits, 1)
         r_dist = means
         self.corr_ver = corr_ver
-        if self.corr_ver == 1:
-            self.corr_rate_v1 = corr_rate_v1
-        elif self.corr_ver == 2:
-            self.corr_rate_v2 = corr_total_v2
+        self.corr_rate = corr_rate
+        if self.corr_ver == 2:
+            self.corr_rate_list_v2 = (((np.array(range(bandits))+1)*10)[::-1]/(10 * bandits)) * self.corr_rate
+            self.corr_rate_list_v2[-1] = 0
+            self.corr_rate_list_v2 = self.corr_rate_list_v2[np.argsort(r_dist[::-1])]
         BanditEnv.__init__(self, p_dist=p_dist, r_dist=r_dist)
 
 # class BanditNArmedBernoulliCorrupt1(BanditEnv):

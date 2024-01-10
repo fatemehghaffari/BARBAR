@@ -12,7 +12,7 @@ def upper_confidence_bounds_action(t, means, count, epsilon=0.0):
     else:
         return np.argmax(means + np.sqrt(2 * np.log(t) / count))
     
-def run_simulation(env, means_real, num_trials):
+def run_simulation(env, means_real, num_trials, step = 1):
     '''Runs a 10-armed bandit simulation for multiple trials.
     
     Args:
@@ -40,9 +40,10 @@ def run_simulation(env, means_real, num_trials):
         best = np.argmax(means_real)
         return means_real[best] * t - sum([means_real[choices[i]] for i in range(t)])
 
-    return [regret(t) for t in range(num_trials)]
+    return [regret(t) for t in list(range(num_trials)[0 : num_trials : step])]
 
-def run_simulation_multi_agent(env, L, means_real, num_trials, type = "Centralized"):
+
+def run_simulation_multi_agent(env, L, means_real, num_trials, type = "Centralized", step = 1, regret_mode = "round"):
     '''Runs a 10-armed bandit simulation for multiple trials.
     
     Args:
@@ -73,7 +74,10 @@ def run_simulation_multi_agent(env, L, means_real, num_trials, type = "Centraliz
         for ag in range(L):
             reg += means_real[best] * t - sum([means_real[choices[ag][i]] for i in range(t)])
         return reg
-    return [regret(t) for t in range(num_trials)]
+    if regret_mode == "round":
+        return [regret(t) for t in list(range(num_trials)[0 : num_trials : step])]
+    elif regret_mode == "final":
+        return regret(num_trials)
 
 
 
