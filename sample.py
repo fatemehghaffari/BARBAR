@@ -30,8 +30,8 @@ def exp1(n, T, num_rounds):
     LFHet
     UCB muli agent
     '''
-    L_list = list(range(5, 46))[::5]
-
+    L_list = list(range(5, 51))[::5]
+    Cr = 1
     results_ucb_corr1_multi_agent = np.zeros([num_rounds, len(L_list)])
     results_barbar_het = np.zeros([num_rounds, len(L_list)])
     results_barbar_het_lf = np.zeros([num_rounds, len(L_list)])
@@ -39,11 +39,12 @@ def exp1(n, T, num_rounds):
     for nr in range(num_rounds):
         print("Round ", nr, " of ", num_rounds)
 
-        means_real = np.random.uniform(0, 1, 10)
-        env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 0.8)
-        env_corr2.reset()
-
+        means_real = np.random.uniform(0, 1, n)
+        
         for ind in range(len(L_list)):
+            env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = (L_list[0] / L_list[ind]))
+            env_corr2.reset()
+
             print("     Num of agents: ", L_list[ind])
             # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
             K = np.random.binomial(1, 0.5, size=[L_list[ind], n])
@@ -55,14 +56,14 @@ def exp1(n, T, num_rounds):
             results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[ind], K, T, regret_mode = "final", delta = 0.2)
 
 
-    np.save('exp1_results_ucb_corr1_multi_agent_rate.npy', results_ucb_corr1_multi_agent)
-    np.save('exp1_results_barbar_het_rate.npy', results_barbar_het)
-    np.save('exp1_rresults_barbar_het_lf_rate.npy', results_barbar_het_lf)
+    np.save('exp1_results_ucb_corr1_multi_agent_rate_try3.npy', results_ucb_corr1_multi_agent)
+    np.save('exp1_results_barbar_het_rate_try3.npy', results_barbar_het)
+    np.save('exp1_rresults_barbar_het_lf_rate_try3.npy', results_barbar_het_lf)
 
     fig, ax = plt.subplots() 
     print(results_ucb_corr1_multi_agent.mean(axis=0))
     print(results_ucb_corr1_multi_agent.std(axis=0))
-    ax.plot(L_list, results_ucb_corr1_multi_agent.mean(axis=0), color='red', marker="o", label = "CentralizedMAUCB")
+    ax.plot(L_list, results_ucb_corr1_multi_agent.mean(axis=0), color='red', marker="o", label = "CoopMAUCB")
     ax.fill_between(L_list, results_ucb_corr1_multi_agent.mean(axis=0) - results_ucb_corr1_multi_agent.std(axis=0),
                     results_ucb_corr1_multi_agent.mean(axis=0) + results_ucb_corr1_multi_agent.std(axis=0), color='#888888', alpha=0.4)
 
@@ -93,15 +94,15 @@ def exp1(n, T, num_rounds):
     
     ax.plot(L_list, results_ucb_corr1_multi_agent.mean(axis=0)/L_list, color='red', marker="o", label = "CentralizedMAUCB")
     ax.fill_between(L_list, (results_ucb_corr1_multi_agent.mean(axis=0) - results_ucb_corr1_multi_agent.std(axis=0))/L_list,
-                    (results_ucb_corr1_multi_agent.mean(axis=0) + results_ucb_corr1_multi_agent.std(axis=0))/L_list, color='#888888', alpha=0.4)
+                    (results_ucb_corr1_multi_agent.mean(axis=0) + results_ucb_corr1_multi_agent.std(axis=0))/L_list, color='#e27979', alpha=0.4)
     
     ax.plot(L_list, results_barbar_het.mean(axis=0)/L_list, color='blue', marker="d", label = "DistHetBarbar")
     ax.fill_between(L_list, (results_barbar_het.mean(axis=0) - results_barbar_het.std(axis=0))/L_list,
-                    (results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0))/L_list, color='#888888', alpha=0.4)
+                    (results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0))/L_list, color='#a4b9db', alpha=0.4)
     
     ax.plot(L_list, results_barbar_het_lf.mean(axis=0)/L_list, color='green', marker="s", label = "LFHetBarbar")
     ax.fill_between(L_list, results_barbar_het_lf.mean(axis=0)/L_list - results_barbar_het_lf.std(axis=0)/L_list,
-                    results_barbar_het_lf.mean(axis=0)/L_list + results_barbar_het_lf.std(axis=0)/L_list, color='#888888', alpha=0.4)
+                    results_barbar_het_lf.mean(axis=0)/L_list + results_barbar_het_lf.std(axis=0)/L_list, color='#bcd7ae', alpha=0.4)
 
 
     plt.xlabel("Number of Agents")
@@ -134,7 +135,7 @@ def exp2(n, L, T, num_rounds, Num_corr_agents = None):
     for nr in range(num_rounds):
         print("Round ", nr, " of ", num_rounds)
 
-        means_real = np.random.uniform(0, 1, 10)
+        means_real = np.random.uniform(0, 1, n)
         env_corr = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
         env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
         env = BanditNArmedBernoulli(n, deepcopy(means_real))
@@ -225,15 +226,15 @@ def exp3(n, L, T, num_rounds):
     LFHet
     UCB muli agent
     '''
-    r_list = np.array(range(1, 11))/10
+    r_list = np.array(range(3, 11))/10
     results_ucb_corr1_multi_agent = np.zeros([num_rounds, len(r_list)])
     results_barbar_het = np.zeros([num_rounds, len(r_list)])
     results_barbar_het_lf = np.zeros([num_rounds, len(r_list)])
     for nr in range(num_rounds):
         print("Round ", nr, " of ", num_rounds)
 
-        means_real = np.random.uniform(0, 1, 10)
-        env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 0.8)
+        means_real = np.random.uniform(0, 1, n)
+        env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
         env_corr2.reset()
 
         for ind in range(len(r_list)):
@@ -247,26 +248,26 @@ def exp3(n, L, T, num_rounds):
             results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.2)
             results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.2)
 
-    np.save('exp3_results_ucb_corr1_multi_agent_rate.npy', results_ucb_corr1_multi_agent)
-    np.save('exp3_results_barbar_het_rate.npy', results_barbar_het)
-    np.save('exp3_rresults_barbar_het_lf_rate.npy', results_barbar_het_lf)
+    # np.save('exp3_results_ucb_corr1_multi_agent_rate_try3.npy', results_ucb_corr1_multi_agent)
+    # np.save('exp3_results_barbar_het_rate_try3.npy', results_barbar_het)
+    # np.save('exp3_rresults_barbar_het_lf_rate_try3.npy', results_barbar_het_lf)
 
     fig, ax = plt.subplots() 
     
-    ax.plot(r_list, results_ucb_corr1_multi_agent.mean(axis=0), color='red', marker="o", label = "CentralizedMAUCB")
+    ax.plot(r_list, results_ucb_corr1_multi_agent.mean(axis=0), color='red', marker="o", label = "CoopMAUCB")
     ax.fill_between(r_list, (results_ucb_corr1_multi_agent.mean(axis=0) - results_ucb_corr1_multi_agent.std(axis=0)),
-                    (results_ucb_corr1_multi_agent.mean(axis=0) + results_ucb_corr1_multi_agent.std(axis=0)), color='#888888', alpha=0.4)
+                    (results_ucb_corr1_multi_agent.mean(axis=0) + results_ucb_corr1_multi_agent.std(axis=0)), color='#e27979', alpha=0.4)
     
     ax.plot(r_list, results_barbar_het.mean(axis=0), color='blue', marker="d", label = "DistHetBarbar")
     ax.fill_between(r_list, results_barbar_het.mean(axis=0) - results_barbar_het.std(axis=0),
-                    results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0), color='#888888', alpha=0.4)
+                    results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0), color='#a4b9db', alpha=0.4)
     
     ax.plot(r_list, results_barbar_het_lf.mean(axis=0), color='green', marker="s", label = "LFHetBarbar")
     ax.fill_between(r_list, results_barbar_het_lf.mean(axis=0) - results_barbar_het_lf.std(axis=0),
-                    results_barbar_het_lf.mean(axis=0) + results_barbar_het_lf.std(axis=0), color='#888888', alpha=0.4)
+                    results_barbar_het_lf.mean(axis=0) + results_barbar_het_lf.std(axis=0), color='#bcd7ae', alpha=0.4)
     
     plt.xlabel("Prob. of Assigning an Arm to an Agent")
-    plt.ylabel("Cumulative Regret @Round 20K")
+    plt.ylabel("Cumulative Regret @Round 10K")
     plt.xlim([r_list[0], r_list[-1]])
     plt.ylim(bottom = 0)
 
@@ -324,17 +325,17 @@ def main():
     env: Uncorrupted environment
     '''
 
-    n = 10
+    n = 50
     L = 10
-    T = 20000
-    num_rounds = 10
+    T = 2000
+    num_rounds = 2
     # exp 1: 
         # X_axis: Cumulative regret at the end of round 20k
         # Y_axis: Number of agents 5 - 100
         # dist_het lf_het ucb_multi
     # exp1(n, T, num_rounds)
     # exp2(n, L, T, num_rounds)
-    exp2(n, L, T, num_rounds)
+    exp3(n, L, T, num_rounds)
     # exp4(n, L, T, num_rounds)
 #     results_ucb = np.zeros(T)
 #     results_ucb_corr1 = np.zeros(T)
