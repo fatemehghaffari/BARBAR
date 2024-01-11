@@ -120,7 +120,73 @@ def exp1(n, T, num_rounds):
 
     plt.show()
     # plt.title("Bernoulli 10-armed-bandit regret vs time")
-  
+
+def exp5(n, L, T, num_rounds):
+    '''
+    Cumulative regret @Round 20k for diff num of agents (5 - 105)
+    DistHet
+    LFHet
+    UCB muli agent
+    '''
+    C_list = np.array(range(11))/10
+    results_ucb_corr1_multi_agent = np.zeros([num_rounds, len(C_list)])
+    results_barbar_het = np.zeros([num_rounds, len(C_list)])
+    results_barbar_het_lf = np.zeros([num_rounds, len(C_list)])
+    
+    for nr in range(num_rounds):
+        print("Round ", nr, " of ", num_rounds)
+
+        means_real = np.random.uniform(0, 1, n)
+        
+        for ind in range(len(C_list)):
+            env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = (C_list[ind]))
+            env_corr2.reset()
+
+            print("     Corr Rate: ", C_list[ind])
+            # K = np.random.binomial(1, 5 / C_list[ind], size=[C_list[ind], n])
+            K = np.random.binomial(1, 0.5, size=[L, n])
+            while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
+                # K = np.random.binomial(1, 5 / C_list[ind], size=[C_list[ind], n])
+                K = np.random.binomial(1, 0.5, size=[L, n])
+            results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K, env_corr2, L, means_real, T, regret_mode = "final")
+            results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.2)
+            results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.2)
+
+
+    # np.save('exp5_results_ucb_corr1_multi_agent_rate_try3.npy', results_ucb_corr1_multi_agent)
+    # np.save('exp5_results_barbar_het_rate_try3.npy', results_barbar_het)
+    # np.save('exp5_rresults_barbar_het_lf_rate_try3.npy', results_barbar_het_lf)
+
+    fig, ax = plt.subplots() 
+    print(results_ucb_corr1_multi_agent.mean(axis=0))
+    print(results_ucb_corr1_multi_agent.std(axis=0))
+    ax.plot(C_list, results_ucb_corr1_multi_agent.mean(axis=0), color='red', marker="o", label = "CoopMAUCB")
+    ax.fill_between(C_list, results_ucb_corr1_multi_agent.mean(axis=0) - results_ucb_corr1_multi_agent.std(axis=0),
+                    results_ucb_corr1_multi_agent.mean(axis=0) + results_ucb_corr1_multi_agent.std(axis=0), color='#e27979', alpha=0.4)
+
+    ax.plot(C_list, results_barbar_het.mean(axis=0), color='blue', marker="d", label = "DistHetBarbar")
+    ax.fill_between(C_list, results_barbar_het.mean(axis=0) - results_barbar_het.std(axis=0),
+                    results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0), color='#a4b9db', alpha=0.4)
+    
+    ax.plot(C_list, results_barbar_het_lf.mean(axis=0), color='green', marker="s", label = "LFHetBarbar")
+    ax.fill_between(C_list, results_barbar_het_lf.mean(axis=0) - results_barbar_het_lf.std(axis=0),
+                    results_barbar_het_lf.mean(axis=0) + results_barbar_het_lf.std(axis=0), color='#bcd7ae', alpha=0.4)
+
+    plt.xlabel("Corruption Rate")
+    plt.ylabel("Cumulative Regret @Round 10K")
+    plt.xlim([C_list[0], C_list[-1]])
+    plt.ylim(bottom = 0)
+
+    formatter = mticker.ScalarFormatter(useMathText=True)
+    formatter.set_powerlimits((-3,2))
+    ax.yaxis.set_major_formatter(formatter)
+
+    # lo = Labeloffset(ax, label="Cumulative Regret @Round 20K", axis="y")
+    ax.legend()
+
+
+    plt.show()
+
 def exp2(n, L, T, num_rounds, Num_corr_agents = None):
     '''
     Cumulative regret @ every round up to Round 20k
@@ -314,6 +380,118 @@ def exp3(n, L, T, num_rounds):
 def exp4(n, L, T, num_rounds):
     exp2(n, L, T, num_rounds, Num_corr_agents = 1)
 
+def exp6(n, L, T, num_rounds, Num_corr_agents = None):
+    '''
+    Cumulative regret @ every round up to Round 20k
+    Everything bagel
+    '''
+    results_ucb_corr1_multi_agent_corr = np.zeros([num_rounds, T])
+    results_barbar_het_corr = np.zeros([num_rounds, T])
+    results_barbar_het_lf_corr = np.zeros([num_rounds, T])
+
+    results_ucb_corr1_multi_agent_nocorr = np.zeros([num_rounds, T])
+    results_barbar_het_nocorr = np.zeros([num_rounds, T])
+    results_barbar_het_lf_nocorr = np.zeros([num_rounds, T])
+
+    for nr in range(num_rounds):
+        print("Round ", nr, " of ", num_rounds)
+
+        means_real = np.random.uniform(0, 1, n)
+        env_corr = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
+        env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
+        env = BanditNArmedBernoulli(n, deepcopy(means_real))
+        env.reset()
+        env_corr.reset()
+        env_corr2.reset()
+
+        # # results_ucb += run_simulation(env, means_real, T, step = 1)
+        # results_ucb_corr1[nr] += run_simulation(env_corr, means_real, T * L, step = L)
+        # print("     UCB")
+        # # results_ucb_multi_agent += run_simulation_multi_agent(env, L ,means_real, T)
+        
+
+        # results_barbar[nr] += BARBAR(env_corr, means_real, n, T * L, delta = 0.5, step = L)
+        # # K = np.random.binomial(1, 5 / L, size=[L, n])
+        # print("     BARBAR")
+
+        K = np.random.binomial(1, 0.5, size=[L, n])
+        while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
+            # K = np.random.binomial(1, 5 / L, size=[L, n])
+            K = np.random.binomial(1, 0.5, size=[L, n])
+            
+        if Num_corr_agents != None:
+            results_ucb_corr1_multi_agent_corr[nr] = run_simulation_multi_agent(K, env, L, means_real, T, Num_corr_agents = 1, env_corr = env_corr2)
+            results_barbar_het_corr[nr] = BARBAR_dist_het(env, means_real, L, K, T, delta = 0.2, Num_corr_agents = 1, env_corr = env_corr2)
+            results_barbar_het_lf_corr[nr] = BARBAR_lf_het(env, means_real, L, K, T, delta = 0.2, Num_corr_agents = 1, env_corr = env_corr2)
+        else:
+            results_ucb_corr1_multi_agent_corr[nr] = run_simulation_multi_agent(K, env_corr2, L, means_real, T)
+            print("     MA UCB C")
+            results_barbar_het_corr[nr] = BARBAR_dist_het(env_corr2, means_real, L, K, T, delta = 0.2)
+            print("     Dist HET C")
+            results_barbar_het_lf_corr[nr] = BARBAR_lf_het(env_corr2, means_real, L, K, T, delta = 0.2)
+            print("     LF HET C")
+
+            results_ucb_corr1_multi_agent_nocorr[nr] = run_simulation_multi_agent(K, env, L, means_real, T)
+            print("     MA UCB NC")
+            results_barbar_het_nocorr[nr] = BARBAR_dist_het(env, means_real, L, K, T, delta = 0.2)
+            print("     Dist HET NC")
+            results_barbar_het_lf_nocorr[nr] = BARBAR_lf_het(env, means_real, L, K, T, delta = 0.2)
+            print("     LF HET NC")
+
+
+
+    # np.save('exp2_results_ucb_corr1.npy', results_ucb_corr1)
+    # np.save('exp2_results_barbar.npy', results_barbar)
+    np.save('exp6_results_ucb_corr1_multi_agent_corr.npy', results_ucb_corr1_multi_agent_corr)
+    np.save('exp6_results_ucb_corr1_multi_agent_nocorr.npy', results_ucb_corr1_multi_agent_nocorr)
+
+    np.save('exp6_results_barbar_het_corr.npy', results_barbar_het_corr)
+    np.save('exp6_results_barbar_het_nocorr.npy', results_barbar_het_nocorr)
+
+    np.save('exp6_results_barbar_het_lf_corr.npy', results_barbar_het_lf_corr)
+    np.save('exp6_results_barbar_het_lf_nocorr.npy', results_barbar_het_lf_nocorr)
+
+    fig, ax = plt.subplots() 
+    ax.plot(list(range(T)), results_ucb_corr1_multi_agent_corr.mean(axis=0), marker='o',markevery=2500, label = "CoopMAUCB - w/ Corruption", color='red')
+    ax.fill_between(list(range(T)), (results_ucb_corr1_multi_agent_corr.mean(axis=0) - results_ucb_corr1_multi_agent_corr.std(axis=0)),
+                    (results_ucb_corr1_multi_agent_corr.mean(axis=0) + results_ucb_corr1_multi_agent_corr.std(axis=0)), color='#e27979', alpha=0.4)
+    
+    ax.plot(list(range(T)), results_barbar_het_corr.mean(axis=0), marker='d',markevery=2500, label = "DistHetBarbar - w/ Corruption", color='blue')
+    ax.fill_between(list(range(T)), (results_barbar_het_corr.mean(axis=0) - results_barbar_het_corr.std(axis=0)),
+                    (results_barbar_het_corr.mean(axis=0) + results_barbar_het_corr.std(axis=0)), color='#a4b9db', alpha=0.4)
+    
+    ax.plot(list(range(T)), results_barbar_het_lf_corr.mean(axis=0), marker='s',markevery=2500, label = "LFHetBarbar - w/ Corruption", color = "green")
+    ax.fill_between(list(range(T)), (results_barbar_het_lf_corr.mean(axis=0) - results_barbar_het_lf_corr.std(axis=0)),
+                    (results_barbar_het_lf_corr.mean(axis=0) + results_barbar_het_lf_corr.std(axis=0)), color='#bcd7ae', alpha=0.4)
+    
+    ax.plot(list(range(T)), results_ucb_corr1_multi_agent_nocorr.mean(axis=0), marker='+',linestyle = 'dotted', markevery=2500, label = "CoopMAUCB - w/o Corruption", color='red')
+    ax.fill_between(list(range(T)), (results_ucb_corr1_multi_agent_nocorr.mean(axis=0) - results_ucb_corr1_multi_agent_nocorr.std(axis=0)),
+                    (results_ucb_corr1_multi_agent_nocorr.mean(axis=0) + results_ucb_corr1_multi_agent_nocorr.std(axis=0)), color='#e27979', alpha=0.4)
+    
+    ax.plot(list(range(T)), results_barbar_het_nocorr.mean(axis=0), marker='x',linestyle = 'dotted',markevery=2500, label = "DistHetBarbar - w/o Corruption", color='blue')
+    ax.fill_between(list(range(T)), (results_barbar_het_nocorr.mean(axis=0) - results_barbar_het_nocorr.std(axis=0)),
+                    (results_barbar_het_nocorr.mean(axis=0) + results_barbar_het_nocorr.std(axis=0)), color='#a4b9db', alpha=0.4)
+    
+    ax.plot(list(range(T)), results_barbar_het_lf_nocorr.mean(axis=0), marker='*',linestyle = 'dotted',markevery=2500, label = "LFHetBarbar - w/o Corruption", color = "green")
+    ax.fill_between(list(range(T)), (results_barbar_het_lf_nocorr.mean(axis=0) - results_barbar_het_lf_nocorr.std(axis=0)),
+                    (results_barbar_het_lf_nocorr.mean(axis=0) + results_barbar_het_lf_nocorr.std(axis=0)), color='#bcd7ae', alpha=0.4)
+
+    plt.xlabel("Rounds")
+    plt.ylabel("Cumulative Regret")
+    plt.xlim([0, T])
+    plt.ylim(bottom = 0)
+
+    formatter = mticker.ScalarFormatter(useMathText=True)
+    formatter.set_powerlimits((-3,2))
+    ax.yaxis.set_major_formatter(formatter)
+    ax.xaxis.set_major_formatter(formatter)
+
+    # lo = Labeloffset(ax, label="Cumulative Regret @Round 20K", axis="y")
+    ax.legend()
+
+
+    plt.show()
+
 def main():
     '''Compares the epsilon-greedy approach to the upper confidence bounds
     approach for solving the multi-armed bandit problem.
@@ -327,16 +505,18 @@ def main():
 
     n = 50
     L = 10
-    T = 2000
-    num_rounds = 2
+    T = 20000
+    num_rounds = 10
     # exp 1: 
         # X_axis: Cumulative regret at the end of round 20k
         # Y_axis: Number of agents 5 - 100
         # dist_het lf_het ucb_multi
     # exp1(n, T, num_rounds)
     # exp2(n, L, T, num_rounds)
-    exp3(n, L, T, num_rounds)
+    # exp3(n, L, T, num_rounds)
     # exp4(n, L, T, num_rounds)
+    # exp5(n, L, T, num_rounds)
+    exp6(n, L, T, num_rounds)
 #     results_ucb = np.zeros(T)
 #     results_ucb_corr1 = np.zeros(T)
 #     results_ucb_corr1_multi_agent = np.zeros(T)

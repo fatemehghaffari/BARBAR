@@ -1,5 +1,5 @@
 import numpy as np
-
+from time import sleep
 def upper_confidence_bounds_action(t, means, count, epsilon=0.0):
     '''Play each arm once, then choose according to the equation given
     by Auer, Cesa-Bianchi & Fisher (2002).
@@ -57,11 +57,12 @@ def run_simulation_multi_agent(K, env, L, means_real, num_trials, type = "Centra
     means = np.zeros([L, n])
     count = np.zeros([L, n])
     choices = [[] for _ in range(L)]
-
+    L_list = np.sum(K, axis = 0)
     if type == "Centralized":
         for t in range(num_trials):
             for ag in range(L):
-                action = upper_confidence_bounds_action(t, np.mean(means, axis = 0) * K[ag], np.mean(count, axis = 0) * K[ag])
+                action = upper_confidence_bounds_action(t, (np.sum(means, axis = 0)/L_list)[K[ag]==1], np.sum(count, axis = 0)[K[ag]==1])
+                action = np.array(range(n))[K[ag]==1][action]
                 if Num_corr_agents != None:
                     if ag == 0:
                         observation, reward, done, info = env_corr.step(action)
@@ -79,7 +80,9 @@ def run_simulation_multi_agent(K, env, L, means_real, num_trials, type = "Centra
         reg = 0
         for ag in range(L):
             best = np.argmax(means_real * K[ag])
-            reg += means_real[best] * t - sum([means_real[choices[ag][i]] for i in range(t)])
+            a = means_real[best] * t
+            b = sum([means_real[choices[ag][i]] for i in range(t)])
+            reg += a - b
         return reg
     if regret_mode == "round":
         return [regret(t) for t in list(range(num_trials)[0 : num_trials : step])]
