@@ -40,25 +40,32 @@ def exp1(n, T, num_rounds):
         print("Round ", nr, " of ", num_rounds)
 
         means_real = np.random.uniform(0, 1, n)
-        
+        # means_real = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
         for ind in range(len(L_list)):
             env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = (L_list[0] / L_list[ind]))
             env_corr2.reset()
-
+            env = BanditNArmedBernoulli(n, deepcopy(means_real))
+            env.reset()
             print("     Num of agents: ", L_list[ind])
             # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
-            K = np.random.binomial(1, 0.5, size=[L_list[ind], n])
+            K = np.random.binomial(1, 0.1, size=[L_list[ind], n])
             while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
                 # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
-                K = np.random.binomial(1, 0.5, size=[L_list[ind], n])
-            results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K, env_corr2, L_list[ind], means_real, T, regret_mode = "final")
-            results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L_list[ind], K, T, regret_mode = "final", delta = 0.2)
-            results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[ind], K, T, regret_mode = "final", delta = 0.2)
+                K = np.random.binomial(1, 1, size=[L_list[ind], n])
+            results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K, env_corr2, L_list[ind], means_real, T,
+                                                                                 regret_mode = "final")
+            results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L_list[ind], K, T, 
+                                                          regret_mode = "final", delta = 0.01)
+            results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[ind], K, T, 
+                                                           regret_mode = "final", delta = 0.01)
 
 
-    np.save('exp1_results_ucb_corr1_multi_agent_rate_try3.npy', results_ucb_corr1_multi_agent)
-    np.save('exp1_results_barbar_het_rate_try3.npy', results_barbar_het)
-    np.save('exp1_rresults_barbar_het_lf_rate_try3.npy', results_barbar_het_lf)
+    # np.save('exp1_results_ucb_corr1_multi_agent_rate_try3.npy', results_ucb_corr1_multi_agent)
+    # np.save('exp1_results_barbar_het_rate_try3.npy', results_barbar_het)
+    # np.save('exp1_rresults_barbar_het_lf_rate_try3.npy', results_barbar_het_lf)
+
+    # results_barbar_het = np.load('exp1_results_barbar_het_rate_try3.npy')
+    # results_barbar_het_lf = np.load('exp1_rresults_barbar_het_lf_rate_try3.npy')
 
     fig, ax = plt.subplots() 
     print(results_ucb_corr1_multi_agent.mean(axis=0))
@@ -311,8 +318,8 @@ def exp3(n, L, T, num_rounds):
                 # K = np.random.binomial(1, 5 / L, size=[L, n])
                 K = np.random.binomial(1, r_list[ind], size=[L, n])
             results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K, env_corr2, L, means_real, T, regret_mode = "final")
-            results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.2)
-            results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.2)
+            results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.01)
+            results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L, K, T, regret_mode = "final", delta = 0.01)
 
     # np.save('exp3_results_ucb_corr1_multi_agent_rate_try3.npy', results_ucb_corr1_multi_agent)
     # np.save('exp3_results_barbar_het_rate_try3.npy', results_barbar_het)
@@ -395,7 +402,7 @@ def exp6(n, L, T, num_rounds, Num_corr_agents = None):
 
     for nr in range(num_rounds):
         print("Round ", nr, " of ", num_rounds)
-
+        # means_real = np.array([0.9, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.3])
         means_real = np.random.uniform(0, 1, n)
         env_corr = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
         env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
@@ -414,10 +421,10 @@ def exp6(n, L, T, num_rounds, Num_corr_agents = None):
         # # K = np.random.binomial(1, 5 / L, size=[L, n])
         # print("     BARBAR")
 
-        K = np.random.binomial(1, 0.5, size=[L, n])
+        K = np.random.binomial(1, 1, size=[L, n])
         while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
             # K = np.random.binomial(1, 5 / L, size=[L, n])
-            K = np.random.binomial(1, 0.5, size=[L, n])
+            K = np.random.binomial(1, 1, size=[L, n])
             
         if Num_corr_agents != None:
             results_ucb_corr1_multi_agent_corr[nr] = run_simulation_multi_agent(K, env, L, means_real, T, Num_corr_agents = 1, env_corr = env_corr2)
@@ -442,14 +449,14 @@ def exp6(n, L, T, num_rounds, Num_corr_agents = None):
 
     # np.save('exp2_results_ucb_corr1.npy', results_ucb_corr1)
     # np.save('exp2_results_barbar.npy', results_barbar)
-    np.save('exp6_results_ucb_corr1_multi_agent_corr.npy', results_ucb_corr1_multi_agent_corr)
-    np.save('exp6_results_ucb_corr1_multi_agent_nocorr.npy', results_ucb_corr1_multi_agent_nocorr)
+    # np.save('exp6_results_ucb_corr1_multi_agent_corr.npy', results_ucb_corr1_multi_agent_corr)
+    # np.save('exp6_results_ucb_corr1_multi_agent_nocorr.npy', results_ucb_corr1_multi_agent_nocorr)
 
-    np.save('exp6_results_barbar_het_corr.npy', results_barbar_het_corr)
-    np.save('exp6_results_barbar_het_nocorr.npy', results_barbar_het_nocorr)
+    # np.save('exp6_results_barbar_het_corr.npy', results_barbar_het_corr)
+    # np.save('exp6_results_barbar_het_nocorr.npy', results_barbar_het_nocorr)
 
-    np.save('exp6_results_barbar_het_lf_corr.npy', results_barbar_het_lf_corr)
-    np.save('exp6_results_barbar_het_lf_nocorr.npy', results_barbar_het_lf_nocorr)
+    # np.save('exp6_results_barbar_het_lf_corr.npy', results_barbar_het_lf_corr)
+    # np.save('exp6_results_barbar_het_lf_nocorr.npy', results_barbar_het_lf_nocorr)
 
     fig, ax = plt.subplots() 
     ax.plot(list(range(T)), results_ucb_corr1_multi_agent_corr.mean(axis=0), marker='o',markevery=2500, label = "CoopMAUCB - w/ Corruption", color='red')
@@ -503,20 +510,20 @@ def main():
     env: Uncorrupted environment
     '''
 
-    n = 50
+    n = 100
     L = 10
-    T = 20000
-    num_rounds = 10
+    T = 5000
+    num_rounds = 1
     # exp 1: 
         # X_axis: Cumulative regret at the end of round 20k
         # Y_axis: Number of agents 5 - 100
         # dist_het lf_het ucb_multi
-    # exp1(n, T, num_rounds)
+    exp1(n, T, num_rounds)
     # exp2(n, L, T, num_rounds)
     # exp3(n, L, T, num_rounds)
     # exp4(n, L, T, num_rounds)
     # exp5(n, L, T, num_rounds)
-    exp6(n, L, T, num_rounds)
+    # exp6(n, L, T, num_rounds)
 #     results_ucb = np.zeros(T)
 #     results_ucb_corr1 = np.zeros(T)
 #     results_ucb_corr1_multi_agent = np.zeros(T)

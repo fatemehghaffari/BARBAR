@@ -7,7 +7,7 @@ def upper_confidence_bounds_action(t, means, count, epsilon=0.0):
     This is said to achieve the most optimal solution, with logarithmic regret.
     '''
 
-    if t < 10:
+    if t < len(means):
         return t
     else:
         return np.argmax(means + np.sqrt(2 * np.log(t) / count))
@@ -58,26 +58,41 @@ def run_simulation_multi_agent(K, env, L, means_real, num_trials, type = "Centra
     count = np.zeros([L, n])
     choices = [[] for _ in range(L)]
     L_list = np.sum(K, axis = 0)
+    m = 1
     if type == "Centralized":
         for t in range(num_trials):
             for ag in range(L):
-                action = upper_confidence_bounds_action(t, (np.sum(means, axis = 0)/L_list)[K[ag]==1], np.sum(count, axis = 0)[K[ag]==1])
+                action = upper_confidence_bounds_action(t, means[ag][K[ag]==1], count[ag][K[ag]==1])
                 action = np.array(range(n))[K[ag]==1][action]
                 if Num_corr_agents != None:
-                    if ag == 0:
+                    if ag in range(Num_corr_agents):
                         observation, reward, done, info = env_corr.step(action)
+
+                        #####
                         # Keep track of sample means for exploitation, and choices for regret calculation 
                         count[ag, action] += 1
                         means[ag, action] = (1 - 1/count[ag, action]) * means[ag, action] + (1/count[ag, action]) * reward
                         choices[ag].append(action)
-                        continue
-                observation, reward, done, info = env.step(action)
-                # Keep track of sample means for exploitation, and choices for regret calculation 
-                count[ag, action] += 1
-                means[ag, action] = (1 - 1/count[ag, action]) * means[ag, action] + (1/count[ag, action]) * reward
-                choices[ag].append(action)
+                    else:
+                        observation, reward, done, info = env.step(action)
+                        # Keep track of sample means for exploitation, and choices for regret calculation 
+                        count[ag, action] += 1
+                        means[ag, action] = (1 - 1/count[ag, action]) * means[ag, action] + (1/count[ag, action]) * reward
+                        choices[ag].append(action)
+                else:
+
+                    observation, reward, done, info = env.step(action)
+                    # Keep track of sample means for exploitation, and choices for regret calculation 
+                    count[ag, action] += 1
+                    means[ag, action] = (1 - 1/count[ag, action]) * means[ag, action] + (1/count[ag, action]) * reward
+                    choices[ag].append(action)
+            if t == 8**m:
+                means = (means.sum(axis=0) * K) / L_list
+                count = count.sum(axis=0) * K
+                m += 1
     def regret(t):
         reg = 0
+        from collections import Counter
         for ag in range(L):
             best = np.argmax(means_real * K[ag])
             a = means_real[best] * t

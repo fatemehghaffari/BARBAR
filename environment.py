@@ -55,6 +55,11 @@ class BanditEnv(gym.Env):
         if self.corr_ver == 2:
             if np.random.binomial(1, self.corr_rate_list_v2[action]):
                 reward = int(not(reward))
+        if self.corr_ver == 3:
+            # if np.argsort(self.r_dist)[action] == (len(self.r_dist) - 1):
+                # reward  = np.random.binomial(1, 1)
+            sr = np.argsort(self.r_dist)
+            reward = np.random.binomial(1, self.r_dist[np.where(sr == (len(sr) -1 -sr[action]))])
         return 0, reward, done, {}
 
     def _reset(self):
@@ -81,6 +86,8 @@ class BanditNArmedBernoulli(BanditEnv):
             self.corr_rate_list_v2 = (((np.array(range(bandits))+1)*10)[::-1]/(10 * bandits)) * self.corr_rate
             self.corr_rate_list_v2[-1] = 0
             self.corr_rate_list_v2 = self.corr_rate_list_v2[np.argsort(r_dist[::-1])]
+
+
         BanditEnv.__init__(self, p_dist=p_dist, r_dist=r_dist)
 
 # class BanditNArmedBernoulliCorrupt1(BanditEnv):

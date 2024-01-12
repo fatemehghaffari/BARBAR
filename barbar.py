@@ -4,7 +4,7 @@ from time import sleep
 from collections import Counter
 def BARBAR(env, means_real, K, T, delta = 0.2, step = 1):
     # lmbda = 1024 * np.log((8 * K / delta) * np.log2(T))
-    lmbda = np.log((8 * K / delta) * np.log2(T))
+    lmbda = (1/64)*np.log((8 * K / delta) * np.log2(T))
     t = 0
     m = 1
     n = np.zeros([1, K])
@@ -34,7 +34,7 @@ def BARBAR(env, means_real, K, T, delta = 0.2, step = 1):
 
     return [regret(t) for t in list(range(T)[0 : T : step])]
         
-def BARBAR_dist_het_agent(env, K, N, pr):
+def BARBAR_dist_het_agent(env, K, L, N, pr, T, t):
     '''
     K_j: a 1xK array for agent j, if K_j[i] is 1, agent j has access to arm i, 0 otherwise
     L: a 1xK array showing the accessability of arms, arm i is accessed by L[i] agents
@@ -60,7 +60,7 @@ def BARBAR_dist_het_agent(env, K, N, pr):
     return ereward, actions
 
 
-def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1, Num_corr_agents = None, env_corr = None, ):
+def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1, Num_corr_agents = None, env_corr = None):
     L_list = np.sum(K, axis = 0)
     r = np.zeros([L, len(L_list)])
     rs = np.zeros(L)
@@ -69,7 +69,7 @@ def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2
     t = 0
     all_actions = [[] for _ in range(L)]
     k = K.shape[1]
-    lmbda = np.log((8 * k / delta) * np.log2(T))
+    lmbda = (1)*np.log((8 * k / delta) * np.log2(T))
     n = np.zeros([L, k])
     while t < T:
         N_max = 0
@@ -81,28 +81,34 @@ def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2
             N_max = max(N_max, N)
             pr = n[j] / (L_list * N)
             if Num_corr_agents != None:
-                if (j == 0):
-                    er, actions = BARBAR_dist_het_agent(env_corr, k, N, pr)
+                if j in range(Num_corr_agents):
+                    er, actions = BARBAR_dist_het_agent(env_corr, k, L, N, pr, T, t)
                     er = (er * L_list)/n[j]
                     er[np.isnan(er)] = 0
                     r[j] = er
                     all_actions[j] += actions
-                    continue
-            er, actions = BARBAR_dist_het_agent(env, k, N, pr)
-            er = (er * L_list)/n[j]
-            er[np.isnan(er)] = 0
-            r[j] = er
-            all_actions[j] += actions
+                else:
+                    er, actions = BARBAR_dist_het_agent(env, k, L, N, pr, T, t)
+                    er = (er * L_list)/n[j]
+                    er[np.isnan(er)] = 0
+                    r[j] = er
+                    all_actions[j] += actions
+            else:
+                er, actions = BARBAR_dist_het_agent(env, k, L, N, pr, T, t)
+                er = (er * L_list)/n[j]
+                er[np.isnan(er)] = 0
+                r[j] = er
+                all_actions[j] += actions
         t += N_max
         r_mean = np.mean(r, axis=0)
         rs = np.max(K * r_mean - (1/16) * Delta, axis=1)
         Delta = np.maximum(2**(-1*m), (np.reshape(rs, [len(rs), 1]) - r_mean)*K)
         m += 1    
-    # from collections import Counter
     # for ind in range(L):
     #     print(Counter(all_actions[ind]))
     #     print(len(all_actions[ind]))
     #     print()
+    #     sleep(3)
     def regret(t):
         agg_reg = 0
         best = np.argmax(means_real * K, axis = 1)
@@ -129,7 +135,7 @@ def BARBAR_lf_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, 
     t = 0
     all_actions = [[] for _ in range(L)]
     
-    lmbda = np.log((8 * k / delta) * np.log2(T))
+    lmbda = (1)*np.log((8 * k / delta) * np.log2(T))
     n = np.zeros(k)
     while t < T:
         N_max = 0
@@ -143,19 +149,23 @@ def BARBAR_lf_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, 
             pra = np.zeros(k)
             pra[action] = 1
             if Num_corr_agents != None:
-                if (j == 0):
-                    er, actions = BARBAR_dist_het_agent(env_corr, k, N, pra)
+                if j in range(Num_corr_agents):
+                    er, actions = BARBAR_dist_het_agent(env_corr, k, L, N, pra, T, t)
                     r += er
                     all_actions[j] += actions
-                    continue
-            er, actions = BARBAR_dist_het_agent(env, k, N, pra)
-            r += er
-            all_actions[j] += actions
+                else:
+                    er, actions = BARBAR_dist_het_agent(env, k, L, N, pra, T, t)
+                    r += er
+                    all_actions[j] += actions
+            else:
+                er, actions = BARBAR_dist_het_agent(env, k, L, N, pra, T, t)
+                r += er
+                all_actions[j] += actions
         t += N_max
         r = r/n
         rs = np.max(r - (1/16) * Delta)
         Delta = np.maximum(2**(-1*m), (rs - r))
-        m += 1    
+        m += 1  
     # from collections import Counter
     # for ind in range(L):
     #     print(Counter(all_actions[ind]))
