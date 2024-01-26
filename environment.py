@@ -49,9 +49,11 @@ class BanditEnv(gym.Env):
             else:
                 # corr = np.random.uniform(0, C)
                 reward = np.random.binomial(1, self.r_dist[action])
+        reward = np.random.binomial(1, self.r_dist[action])
         if self.corr_ver == 1:
             if np.random.binomial(1, self.corr_rate):
                 reward = int(not(reward))
+                # reward = 1 - reward
         if self.corr_ver == 2:
             if np.random.binomial(1, self.corr_rate_list_v2[action]):
                 reward = int(not(reward))
