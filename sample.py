@@ -33,66 +33,66 @@ def exp1(n, T, num_rounds):
     '''
     L_list = list(range(10, 51))[::5]
         
-    # # # Cr = 1
-    # results_ucb_corr1_multi_agent = np.zeros([num_rounds, len(L_list)])
-    # results_barbar_het = np.zeros([num_rounds, len(L_list)])
-    # results_barbar_het_lf = np.zeros([num_rounds, len(L_list)])
-    # results_barbar = np.zeros([num_rounds, len(L_list)])
-    # for nr in range(num_rounds):
-    #     print("Round ", nr, " of ", num_rounds)
+    # # Cr = 1
+    results_ucb_corr1_multi_agent = np.zeros([num_rounds, len(L_list)])
+    results_barbar_het = np.zeros([num_rounds, len(L_list)])
+    results_barbar_het_lf = np.zeros([num_rounds, len(L_list)])
+    results_barbar = np.zeros([num_rounds, len(L_list)])
+    for nr in range(num_rounds):
+        print("Round ", nr, " of ", num_rounds)
 
-    #     means_real = np.random.uniform(0, 1, n)
-    #     # means_real = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    #     for ind in range(len(L_list)):
-    #         # env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = (L_list[ind]/L_list[-1]))
-    #         env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
-    #         env_corr2.reset()
-    #         env = BanditNArmedBernoulli(n, deepcopy(means_real))
-    #         env.reset()
-    #         print("     Num of agents: ", L_list[ind])
-    #         # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
-    #         K = np.random.binomial(1, 0.4, size=[L_list[ind], n])
-    #         while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
-    #             # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
-    #             K = np.random.binomial(1, 0.4, size=[L_list[ind], n])
-            # for j in range(K.shape[0]):   
-            #     # run_simulation_multi_agent(K, env_corr2, L, means_real, T, 2)
-            #     env_corr = BanditNArmedBernoulli(len(means_real[K[j] == 1]), deepcopy(means_real[K[j] == 1]), corr_ver = 1, corr_rate = 1)
-            #     env_corr.reset()
+        means_real = np.random.uniform(0, 1, n)
+        # means_real = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        for ind in range(len(L_list)):
+            # env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = (L_list[ind]/L_list[-1]))
+            env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
+            env_corr2.reset()
+            env = BanditNArmedBernoulli(n, deepcopy(means_real))
+            env.reset()
+            print("     Num of agents: ", L_list[ind])
+            # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
+            K = np.random.binomial(1, 0.4, size=[L_list[ind], n])
+            while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
+                # K = np.random.binomial(1, 5 / L_list[ind], size=[L_list[ind], n])
+                K = np.random.binomial(1, 0.4, size=[L_list[ind], n])
+            for j in range(K.shape[0]):   
+                # run_simulation_multi_agent(K, env_corr2, L, means_real, T, 2)
+                env_corr = BanditNArmedBernoulli(len(means_real[K[j] == 1]), deepcopy(means_real[K[j] == 1]), corr_ver = 1, corr_rate = 1)
+                env_corr.reset()
 
-            #     env2 = BanditNArmedBernoulli(len(means_real[K[j] == 1]), deepcopy(means_real[K[j] == 1]))
-            #     env2.reset()
-            #         # # results_ucb += run_simulation(env, means_real, T, step = 1)
-            #     if j <= 9:
-            #         x = BARBAR(env_corr, means_real[K[j] == 1], len(means_real[K[j] == 1]), T, delta = 0.1, regret_mode='final')
-            #         results_barbar[nr, ind] += x
-            #     else:
-            #         results_barbar[nr, ind] += BARBAR(env2, means_real[K[j] == 1], len(means_real[K[j] == 1]), T, delta = 0.1, regret_mode='final')
-    #         # results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K , env_corr2, L_list[ind], means_real, T,
-    #         #                                                                      regret_mode = "final")
-    #         # results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L_list[ind], K , T, 
-    #         #                                               regret_mode = "final", delta = 0.01)
-    #         # results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[ind], K , T, 
-    #         #                                                regret_mode = "final", delta = 0.01)
-            # results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K[:L_list[0], :], env_corr2, L_list[0], means_real, T,
+                env2 = BanditNArmedBernoulli(len(means_real[K[j] == 1]), deepcopy(means_real[K[j] == 1]))
+                env2.reset()
+                    # # results_ucb += run_simulation(env, means_real, T, step = 1)
+                if j <= 9:
+                    x = BARBAR(env_corr, means_real[K[j] == 1], len(means_real[K[j] == 1]), T, delta = 0.1, regret_mode='final')
+                    results_barbar[nr, ind] += x
+                else:
+                    results_barbar[nr, ind] += BARBAR(env2, means_real[K[j] == 1], len(means_real[K[j] == 1]), T, delta = 0.1, regret_mode='final')
+            # results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K , env_corr2, L_list[ind], means_real, T,
             #                                                                      regret_mode = "final")
-            # results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L_list[0], K[:L_list[0], :], T, 
+            # results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L_list[ind], K , T, 
             #                                               regret_mode = "final", delta = 0.01)
-            # results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[0], K[:L_list[0], :], T, 
+            # results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[ind], K , T, 
             #                                                regret_mode = "final", delta = 0.01)
-            # if L_list[ind] - L_list[0] > 0:
-            #     results_ucb_corr1_multi_agent[nr, ind] += run_simulation_multi_agent(K[L_list[0]:, :], env, L_list[ind] - L_list[0], means_real, T,
-            #                                                                      regret_mode = "final")
-            #     results_barbar_het[nr, ind] += BARBAR_dist_het(env, means_real, L_list[ind] - L_list[0], K[L_list[0]:, :], T, 
-            #                                                 regret_mode = "final", delta = 0.01)
-            #     results_barbar_het_lf[nr, ind] += BARBAR_lf_het(env, means_real, L_list[ind] - L_list[0], K[L_list[0]:, :], T, 
-                                                        #    regret_mode = "final", delta = 0.01)
+            results_ucb_corr1_multi_agent[nr, ind] = run_simulation_multi_agent(K[:L_list[0], :], env_corr2, L_list[0], means_real, T,
+                                                                                 regret_mode = "final")
+            results_barbar_het[nr, ind] = BARBAR_dist_het(env_corr2, means_real, L_list[0], K[:L_list[0], :], T, 
+                                                          regret_mode = "final", delta = 0.01, comm_cost=4)
+            results_barbar_het_lf[nr, ind] = BARBAR_lf_het(env_corr2, means_real, L_list[0], K[:L_list[0], :], T, 
+                                                           regret_mode = "final", delta = 0.01)
+            if L_list[ind] - L_list[0] > 0:
+                results_ucb_corr1_multi_agent[nr, ind] += run_simulation_multi_agent(K[L_list[0]:, :], env, L_list[ind] - L_list[0], means_real, T,
+                                                                                 regret_mode = "final")
+                results_barbar_het[nr, ind] += BARBAR_dist_het(env, means_real, L_list[ind] - L_list[0], K[L_list[0]:, :], T, 
+                                                            regret_mode = "final", delta = 0.01)
+                results_barbar_het_lf[nr, ind] += BARBAR_lf_het(env, means_real, L_list[ind] - L_list[0], K[L_list[0]:, :], T, 
+                                                           regret_mode = "final", delta = 0.01)
 
 
-    results_barbar = np.load('exp1_results_barbar_L10K50T10KCv2.npy')
-    results_ucb_corr1_multi_agent = np.load('exp1_results_ucb_corr1_multi_agent_rate_L10K50T10KCv2.npy')
-    results_barbar_het = np.load('exp1_results_barbar_het_rate_L10K50T10KCv2.npy')
-    results_barbar_het_lf = np.load('exp1_rresults_barbar_het_lf_rate_L10K50T10KCv2.npy')
+    # results_barbar = np.load('exp1_results_barbar_L10K50T10KCv2.npy')
+    # results_ucb_corr1_multi_agent = np.load('exp1_results_ucb_corr1_multi_agent_rate_L10K50T10KCv2.npy')
+    # results_barbar_het = np.load('exp1_results_barbar_het_rate_L10K50T10KCv2.npy')
+    # results_barbar_het_lf = np.load('exp1_rresults_barbar_het_lf_rate_L10K50T10KCv2.npy')
                 
     # results_ucb_corr1_multi_agent = np.load('exp1_results_ucb_corr1_multi_agent_rate_L10K50T10KCv2.npy')
     # results_barbar_het = np.load('exp1_results_barbar_het_rate_L10K50T10KCv2.npy')
@@ -130,7 +130,7 @@ def exp1(n, T, num_rounds):
     # lo = Labeloffset(ax, label="Cumulative Regret @Round 20K", axis="y")
     ax.legend(prop={'size': 15})
     plt.tight_layout()
-    plt.savefig('exp1_K50L10T10kCv2_w_barbar.png', dpi=300)
+    # plt.savefig('exp1_K50L10T10kCv2_w_barbar.png', dpi=300)
     
     plt.show()
 
@@ -620,6 +620,121 @@ def exp6(n, L, T, num_rounds, Num_corr_agents = None):
     plt.savefig('exp6_K50L10T10k_500.png', dpi = 500)
     plt.show()
 
+
+def exp7(n, L, T, num_rounds, Num_corr_agents = None):
+    '''
+    Cumulative regret @ every round up to Round 20k
+    Everything bagel
+    '''
+    results_barbar = np.zeros([num_rounds, T])
+    results_barbar_het_comm = np.zeros([num_rounds, T])
+    results_barbar_het = np.zeros([num_rounds, T])
+    # results_barbar_het_lf = np.zeros([num_rounds, T])
+
+    for nr in range(num_rounds):
+        print("Round ", nr, " of ", num_rounds)
+
+        means_real = np.random.uniform(0, 1, n)
+        # means_real = np.array([0.1 for _ in range(9)] + [0.9])
+        env_corr2 = BanditNArmedBernoulli(n, deepcopy(means_real), corr_ver = 1, corr_rate = 1)
+        env = BanditNArmedBernoulli(n, deepcopy(means_real))
+        env.reset()
+        
+        env_corr2.reset()
+
+        K = np.random.binomial(1, 0.4, size=[L, n])
+        while (0 in np.sum(K, axis=0)) or (0 in np.sum(K, axis=1)):
+            # K = np.random.binomial(1, 5 / L, size=[L, n])
+            K = np.random.binomial(1, 0.4, size=[L, n])
+        for j in range(K.shape[0]):   
+            # run_simulation_multi_agent(K, env_corr2, L, means_real, T, 2)
+            env_corr = BanditNArmedBernoulli(len(means_real[K[j] == 1]), deepcopy(means_real[K[j] == 1]), corr_ver = 1, corr_rate = 1)
+            env_corr.reset()
+            env2 = BanditNArmedBernoulli(len(means_real[K[j] == 1]), deepcopy(means_real[K[j] == 1]))
+            env2.reset()
+                # # results_ucb += run_simulation(env, means_real, T, step = 1)
+            if j < int(L * 1):
+                results_barbar[nr] += BARBAR(env_corr, means_real[K[j] == 1], len(means_real[K[j] == 1]), T, delta = 0.1)
+                print("     BARBAR")
+            else: 
+                results_barbar[nr] += BARBAR(env, means_real[K[j] == 1], len(means_real[K[j] == 1]), T, delta = 0.1)
+                print("     BARBAR")
+
+        if Num_corr_agents != None:
+            results_barbar_het[nr] = BARBAR_dist_het(env, means_real, L, K, T, delta = 0.01, Num_corr_agents = L, env_corr = env_corr2)
+            results_barbar_het_comm[nr] = BARBAR_dist_het(env, means_real, L, K, T, delta = 0.01, Num_corr_agents = L, env_corr = env_corr2, comm_cost=True)
+        # results_barbar_het_lf[nr] = BARBAR_lf_het(env, means_real, L, K, T, delta = 0.01, Num_corr_agents = L, env_corr = env_corr2)
+        else:
+            results_barbar_het[nr] = BARBAR_dist_het(env, means_real, int(L*0.4), K[:int(L*0.4), :], T, delta = 0.01)
+            print("     Dist HET")
+            results_barbar_het_comm[nr] = BARBAR_dist_het(env, means_real, int(L*0.4), K[:int(L*0.4), :], T, delta = 0.01, comm_cost=True)
+            print("     Dist HET COMM")
+            # results_barbar_het_lf[nr] = BARBAR_lf_het(env, means_real, int(L*0.4), K[:int(L*0.4), :], T, delta = 0.01)
+            # print("     LF HET")
+
+        results_barbar_het[nr] += BARBAR_dist_het(env_corr2, means_real, int(L*0.6), K[int(L*0.4):, :], T, delta = 0.01)
+        print("     Dist HET")
+        results_barbar_het_comm[nr] += BARBAR_dist_het(env_corr2, means_real, int(L*0.6), K[int(L*0.4):, :], T, delta = 0.01, comm_cost=True)
+        print("     Dist HET COMM")
+            # results_barbar_het_lf[nr] += BARBAR_lf_het(env_corr2, means_real, int(L*0.6), K[int(L*0.4):, :], T, delta = 0.01)
+            # print("     LF HET")
+
+
+
+    # np.save('exp2_results_barbar.npy', results_barbar)
+    # np.save('exp2_results_ucb_corr1_multi_agent.npy', results_ucb_corr1_multi_agent)
+    # np.save('exp2_results_barbar_het.npy', results_barbar_het)
+    # np.save('exp2_results_barbar_het_lf.npy', results_barbar_het_lf)
+
+    # results_barbar = np.load('exp2_results_barbar.npy')
+    # results_barbar_het = np.load('exp2_results_barbar_het.npy')
+    # results_barbar_het_lf = np.load('exp2_results_barbar_het_lf.npy')
+
+    # results_ucb_corr1_multi_agent = np.load('exp2_results_ucb_corr1_multi_agent.npy')
+    # results_ucb_corr1 = np.load('exp2_results_ucb_corr1.npy')
+    # results_barbar = np.load('exp2_results_barbar.npy')
+    # results_ucb_corr1_multi_agent = np.load('exp2_results_ucb_corr1_multi_agent.npy')
+    # results_barbar_het = np.load('exp2_results_barbar_het.npy')
+    # results_barbar_het_lf = np.load('exp2_results_barbar_het_lf.npy')
+
+    fig, ax = plt.subplots()
+    
+    ax.plot(list(range(T)), results_barbar.mean(axis=0), marker='+',markevery=2000, label = "IndBARBAR", color='orange')
+    ax.fill_between(list(range(T)), (results_barbar.mean(axis=0) - results_barbar.std(axis=0)),
+                    (results_barbar.mean(axis=0) + results_barbar.std(axis=0)), color='#f4c28e', alpha=0.4)
+
+    ax.plot(list(range(T)), results_barbar_het_comm.mean(axis=0), marker='d',markevery=2000, label = "DistBARBAR", color='blue')
+    ax.fill_between(list(range(T)), (results_barbar_het.mean(axis=0) - results_barbar_het.std(axis=0)),
+                    (results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0)), color='#a4b9db', alpha=0.4)
+    
+    ax.plot(list(range(T)), results_barbar_het.mean(axis=0), marker='*',markevery=2000, label = "DistBARBAR-loglogT", color='red')
+    ax.fill_between(list(range(T)), (results_barbar_het.mean(axis=0) - results_barbar_het.std(axis=0)),
+                    (results_barbar_het.mean(axis=0) + results_barbar_het.std(axis=0)), color='#e27979', alpha=0.4)
+    
+    # ax.plot(list(range(T)), results_barbar_het_lf.mean(axis=0), marker='s',markevery=2000, label = "LFBARBAR", color = "green")
+    # ax.fill_between(list(range(T)), (results_barbar_het_lf.mean(axis=0) - results_barbar_het_lf.std(axis=0)),
+    #                 (results_barbar_het_lf.mean(axis=0) + results_barbar_het_lf.std(axis=0)), color='#bcd7ae', alpha=0.4)
+
+    plt.xlabel("Rounds")
+    plt.ylabel("Cumulative Regret")
+    plt.xlim([0, T])
+    plt.ylim(bottom = 0)
+    formatter = mticker.ScalarFormatter(useMathText=True)
+    formatter.set_powerlimits((-3,2))
+    ax.yaxis.set_major_formatter(formatter)
+    # ax.xaxis.set_major_formatter(formatter)
+    ax.legend(prop={'size': 16})
+    ax.grid(which='major', axis='y', linewidth=0.75, linestyle='-', color='0.75')
+    ax.grid(which='minor', axis='y', linewidth=0.25, linestyle='-', color='0.75')
+
+    plt.tight_layout()
+    plt.savefig('exp7_K50L10T10kC1_tight_2.png', dpi=300)
+    # lo = Labeloffset(ax, label="Cumulative Regret @Round 20K", axis="y")
+    plt.show()
+
+
+    plt.show()
+   
 def main():
     '''Compares the epsilon-greedy approach to the upper confidence bounds
     approach for solving the multi-armed bandit problem.
@@ -641,10 +756,11 @@ def main():
         # dist_het lf_het ucb_multi
     # exp1(n, T, num_rounds)
     # exp2(n, L, T, num_rounds)
-    exp3(n, L, T, num_rounds)
+    # exp3(n, L, T, num_rounds)
     # exp4(n, L, T, num_rounds)
-    exp5(n, L, T, num_rounds)
+    # exp5(n, L, T, num_rounds)
     # exp6(n, L, T, num_rounds)
+    exp7(n, L, T, num_rounds)
 #     results_ucb = np.zeros(T)
 #     results_ucb_corr1 = np.zeros(T)
 #     results_ucb_corr1_multi_agent = np.zeros(T)

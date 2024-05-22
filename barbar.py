@@ -64,7 +64,7 @@ def BARBAR_dist_het_agent(env, K, L, N, pr, T, t):
     return ereward, actions
 
 
-def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1, Num_corr_agents = None, env_corr = None):
+def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2, step = 1, Num_corr_agents = None, env_corr = None, comm_cost = 50000):
     L_list = np.sum(K, axis = 0)
     r = np.zeros([L, len(L_list)])
     rs = np.zeros(L)
@@ -80,8 +80,8 @@ def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2
         r = np.zeros([L, k])
         n = (lmbda / (Delta) ** (2)) * K
         n[np.isnan(n)] = 0
-        x = n/L_list
-        x[np.isnan(x)] = 0
+        n = n/L_list
+        n[np.isnan(n)] = 0
         N = np.sum(n, axis = 1)
         pr = n / np.reshape(N, [L, 1])
         # pr = n / np.matmul(np.reshape(N, [L, 1]), np.reshape(L_list, [1, k]))
@@ -108,15 +108,19 @@ def BARBAR_dist_het(env, means_real, L, K, T, regret_mode = "round", delta = 0.2
                 r[np.isnan(r)] = 0
                 all_actions[j] += actions
         t += N.max()
-        r_mean = np.sum(r, axis=0)/L_list
-        # r_mean *= K
-        r_mean[np.isnan(r_mean)] = 0
-        rs = np.max(K * (r_mean - (1/16) * Delta.max(axis=0)), axis=1)
-        # print(rs)
-        # sleep(10)
-        Delta = np.maximum(2**(-1*m), (np.reshape(rs, [len(rs), 1]) - r_mean)*K)*K
-
-        m += 1    
+        if comm_cost and t >= (np.log(T)):
+            r_mean = np.sum(r, axis=0)/L_list
+            # r_mean *= K
+            r_mean[np.isnan(r_mean)] = 0
+            rs = np.max(K * (r_mean - (1/16) * Delta.max(axis=0)), axis=1)
+            # sleep(10)
+            Delta = np.maximum(2**(-1*m), (np.reshape(rs, [len(rs), 1]) - r_mean)*K)*K
+        else:
+            rs = np.max((r - (1/16) * Delta), axis=1)
+            print(rs.shape)
+            Delta = np.maximum(2**(-1*m), (np.reshape(rs, [len(rs), 1]) - r))*K
+        m += 1  
+        # print(N.max(), m)  
     # for ind in range(L):
     #     print(Counter(all_actions[ind]))
     #     print(len(all_actions[ind]))
